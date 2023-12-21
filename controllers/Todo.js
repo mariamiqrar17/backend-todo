@@ -51,22 +51,35 @@ const deleteTodo = async (req, res) => {
 };
 
 const updateTodo = async (req, res) => {
-  const { title, description, price, brand, id } = req.body;
-
-  const obj = {
-    title,
-    brand,
-    price,
-    description,
-  };
-
+  console.log()
   try {
-    const updated = await Todo.findByIdAndUpdate({ _id: id }, obj);
+    const stateId = req.params.id;
+    const { title,description,brand,price } = req.body; // Extracting 'todo' from req.body
+
+    // Find the state by its ID
+    const state = await Todo.findById(stateId);
+    if (!state) {
+      return res.status(404).send({ error: "Todo not found" });
+    }
+
+    // Update the 'todo' field
+    if (state !== undefined) {
+      state.title = title;
+      state.description = description;
+      state.price = price;
+      state.brand = brand
+    } else {
+      return res.status(400).send({ error: "Please provide the todo value" });
+    }
+
+    // Save the updated state
+    await state.save();
+
     res.status(200).send({
-      updated,
+      state,
       message: "Todo updated successfully",
     });
-  } catch (err) {
+  } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }
 };
